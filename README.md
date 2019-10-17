@@ -1,5 +1,7 @@
 # vue-editable-cell
 
+![demo](./public/demo.gif)
+
 ## Demo
 
 TODO push on Netlify
@@ -30,6 +32,10 @@ import EditableCell from 'vue-editable-cell'
 
 ## Usage
 
+The components works on any regular table and requires a TD element as target
+
+**The table rows must be of equal heights !**
+
 ``` js
 <EditableCell
   :target="focusedTd"
@@ -48,3 +54,4 @@ This package is in very early stage of development, features are missing:
 
 - Drag n drop horizontally
 - Style customisation via props
+- write tests
