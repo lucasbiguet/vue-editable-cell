@@ -10,7 +10,9 @@
   "main": "src/index.js",
   "dependencies": {
     "core-js": "^3.1.2",
-    "vue": "^2.6.10"
+    "v-dragged": "^0.0.5",
+    "vue": "^2.6.10",
+    "vue-focus": "^2.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",

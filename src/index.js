@@ -1,8 +1,15 @@
-import Vue from 'vue'
-import App from './App.vue'
+import EditableCell from './components/EditableCell'
 
-Vue.config.productionTip = false
+const install = function (Vue) {
+  Vue.component(EditableCell.name, EditableCell)
+}
 
-new Vue({
-  render: h => h(App)
-}).$mount('#app')
+if (typeof window !== 'undefined' && window.Vue) {
+  window.EditableCell = EditableCell
+  window.Vue.use(EditableCell)
+}
+
+EditableCell.install = install
+
+export default EditableCell
+export { EditableCell }
