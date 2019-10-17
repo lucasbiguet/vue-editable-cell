@@ -1,15 +1,22 @@
 <template>
   <div>
     <table class ref="table">
-      <tr v-for="(row, rowId) in tableData" :key="rowId">
-        <td
-          v-for="(cell, cellId) in row"
-          @click="editTd($event.currentTarget, cell)"
-          :key="cellId"
-        >
-          <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-        </td>
-      </tr>
+      <thead>
+        <th>1</th>
+        <th>2</th>
+        <th>3</th>
+      </thead>
+      <tbody>
+        <tr v-for="(row, rowId) in tableData" :key="rowId">
+          <td
+            v-for="(cell, cellId) in row"
+            @click="editTd($event.currentTarget, cell)"
+            :key="cellId"
+          >
+            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
+          </td>
+        </tr>
+      </tbody>
     </table>
     <EditableCell
       v-if="currentData"

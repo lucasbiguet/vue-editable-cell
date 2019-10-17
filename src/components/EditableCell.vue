@@ -98,22 +98,19 @@ export default {
     rowIndex () {
       if (
         !this.target ||
-        !this.target.parentElement ||
-        this.target.parentElement.tagName !== 'TR'
+        !this.target.closest('tr')
       ) { return }
 
-      return this.target.parentElement.rowIndex
+      return this.target.closest('tr').rowIndex
     },
 
     tableRowsCount () {
       if (
         !this.target ||
-        !this.target.parentElement ||
-        !this.target.parentElement.parentElement ||
-        this.target.parentElement.parentElement.tagName !== 'TABLE'
+        !this.target.closest('table')
       ) { return }
 
-      return this.target.parentElement.parentElement.rows.length
+      return this.target.closest('table').rows.length
     },
 
     maxDragSteps () {
