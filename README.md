@@ -1,24 +1,50 @@
 # vue-editable-cell
 
-## Project setup
-```
-yarn install
-```
+## Demo
 
-### Compiles and hot-reloads for development
-```
+TODO push on Netlify
+
+To run it locally clone this repo and:
+
+``` bash
+cd demo
+yarn
 yarn serve
 ```
 
-### Compiles and minifies for production
-```
-yarn build
+## Install
+
+TODO push on NPM
+
+Meanwhile you can import it directly from this repo:
+
+``` bash
+yarn add https://github.com/lucasbiguet/vue-editable-cell.git
 ```
 
-### Lints and fixes files
-```
-yarn lint
+Then import the component:
+
+``` js
+import EditableCell from 'vue-editable-cell'
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Usage
+
+``` js
+<EditableCell
+  :target="focusedTd"
+  :value="editableValue"
+  :options="selectOptions"
+  @change="updateData"
+  @drag="applyValueToAdjacentRows"
+/>
+```
+
+TODO list and explain props
+
+## Improvements
+
+This package is in very early stage of development, features are missing:
+
+- Drag n drop horizontally
+- Style customisation via props
