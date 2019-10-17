@@ -28,11 +28,12 @@
 
 <script>
 import { focus } from 'vue-focus'
+import { directive as dragged } from 'v-dragged'
 
 export default {
   name: 'EditableCell',
 
-  directives: { focus },
+  directives: { focus, dragged },
 
   props: {
     target: {
