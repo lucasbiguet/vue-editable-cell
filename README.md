@@ -54,4 +54,6 @@ This package is in very early stage of development, features are missing:
 
 - Drag n drop horizontally
 - Style customisation via props
-- write tests
+- Write tests
+- Improve documentation
+- Handle rows / col sizes dynamically
