@@ -85,46 +85,6 @@ export default {
       }
     },
 
-    dragSteps () {
-      if (!this.target || this.dragOffset === null) return 0
-
-      const steps =
-        (this.dragOffset <= 0 ? 0 : 1) +
-        parseInt(Math.abs(this.dragOffset) / this.target.offsetHeight, 10)
-
-      return steps > this.maxDragSteps ? this.maxDragSteps : steps
-    },
-
-    rowIndex () {
-      if (
-        !this.target ||
-        !this.target.closest('tr')
-      ) { return }
-
-      return this.target.closest('tr').rowIndex
-    },
-
-    tableRowsCount () {
-      if (
-        !this.target ||
-        !this.target.closest('table')
-      ) { return }
-
-      return this.target.closest('table').rows.length
-    },
-
-    maxDragSteps () {
-      if (
-        !this.dragOffset ||
-        this.rowIndex === undefined ||
-        !this.tableRowsCount
-      ) { return 0 }
-
-      return this.dragOffset < 0
-        ? this.rowIndex
-        : this.tableRowsCount - (1 + this.rowIndex)
-    },
-
     selectBoxStyle () {
       if (!this.target || this.dragOffset === null) return
 
@@ -140,6 +100,51 @@ export default {
         ),
         left: this.valueToPixels(0 - 1)
       }
+    },
+
+    dragSteps () {
+      if (!this.target || this.dragOffset === null) return 0
+
+      const steps =
+        (this.dragOffset <= 0 ? 0 : 1) +
+        parseInt(Math.abs(this.dragOffset) / this.target.offsetHeight, 10)
+
+      return steps > this.maxDragSteps ? this.maxDragSteps : steps
+    },
+
+    rowIndex () {
+      if (
+        !this.target ||
+        !this.target.closest('tr') ||
+        !this.targetContainer
+      ) return null
+
+      return Array.from(this.targetContainer.rows).indexOf(this.target.closest('tr'))
+    },
+
+    targetContainer () {
+      if (this.target.closest('tbody')) return this.target.closest('tbody')
+      if (this.target.closest('table')) return this.target.closest('table')
+
+      return null
+    },
+
+    rowsCount () {
+      if (!this.target || !this.targetContainer) { return 0 }
+
+      return this.targetContainer.rows.length
+    },
+
+    maxDragSteps () {
+      if (
+        !this.dragOffset ||
+        this.rowIndex === null ||
+        !this.rowsCount
+      ) { return 0 }
+
+      return this.dragOffset < 0
+        ? this.rowIndex
+        : this.rowsCount - (1 + this.rowIndex)
     }
   },
 

@@ -1,10 +1,31 @@
 <template>
   <div>
+    <h4>Simple table</h4>
+    <table class ref="table">
+      <tr v-for="(row, rowId) in tableData" :key="rowId">
+        <td
+          v-for="(cell, cellId) in row"
+          @click="editTd($event.currentTarget, cell)"
+          :key="cellId"
+        >
+          <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
+        </td>
+      </tr>
+    </table>
+
+    <h4>With header</h4>
+
     <table class ref="table">
       <thead>
-        <th>1</th>
-        <th>2</th>
-        <th>3</th>
+        <tr>
+          <th rowspan="2">1</th>
+          <th>2</th>
+          <th>3</th>
+        </tr>
+        <tr>
+          <th>2</th>
+          <th>3</th>
+        </tr>
       </thead>
       <tbody>
         <tr v-for="(row, rowId) in tableData" :key="rowId">
@@ -18,6 +39,52 @@
         </tr>
       </tbody>
     </table>
+
+    <h4>with multiple tBodies</h4>
+
+    <table class ref="table">
+      <thead>
+        <tr>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+        </tr>
+      </thead>
+      <tbody style="border-bottom: 3px solid grey">
+        <tr v-for="(row, rowId) in tableData" :key="rowId">
+          <td
+            v-for="(cell, cellId) in row"
+            @click="editTd($event.currentTarget, cell)"
+            :key="cellId"
+          >
+            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
+          </td>
+        </tr>
+      </tbody>
+      <tbody style="border-bottom: 3px solid grey">
+        <tr v-for="(row, rowId) in tableData" :key="rowId">
+          <td
+            v-for="(cell, cellId) in row"
+            @click="editTd($event.currentTarget, cell)"
+            :key="cellId"
+          >
+            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr v-for="(row, rowId) in tableData" :key="rowId">
+          <td
+            v-for="(cell, cellId) in row"
+            @click="editTd($event.currentTarget, cell)"
+            :key="cellId"
+          >
+            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <EditableCell
       v-if="currentData"
       :target="focusedTd"
@@ -73,6 +140,25 @@ export default {
     }
   },
 
+  computed: {
+    focusedContainer () {
+      if (this.focusedTd.closest('tbody')) return this.focusedTd.closest('tbody')
+      if (this.focusedTd.closest('table')) return this.focusedTd.closest('table')
+
+      return null
+    },
+
+    focusedRowIndex () {
+      if (
+        !this.focusedTd ||
+        !this.focusedTd.closest('tr') ||
+        !this.focusedContainer
+      ) return null
+
+      return Array.from(this.focusedContainer.rows).indexOf(this.focusedTd.closest('tr'))
+    }
+  },
+
   methods: {
     editTd (td, data) {
       this.focusedTd = td
@@ -80,7 +166,7 @@ export default {
     },
 
     updateData (value) {
-      this.tableData[this.focusedTd.parentElement.rowIndex][this.focusedTd.cellIndex].value = value
+      this.tableData[this.focusedRowIndex][this.focusedTd.cellIndex].value = value
       this.focusedTd = null
       this.currentData = null
     },
@@ -88,11 +174,11 @@ export default {
     applyValueToAdjacentRows (steps) {
       if (!steps) return
 
-      let i = this.focusedTd.parentElement.rowIndex
+      let i = this.focusedRowIndex
       let condition = () => {
         return steps < 0
-          ? i >= this.focusedTd.parentElement.rowIndex + steps
-          : i <= this.focusedTd.parentElement.rowIndex + steps
+          ? i >= this.focusedRowIndex + steps
+          : i <= this.focusedRowIndex + steps
       }
 
       while (condition()) {
