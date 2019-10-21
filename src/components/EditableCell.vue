@@ -175,6 +175,7 @@ export default {
       } else if (e.last) {
         this.$emit(
           'drag',
+          this.value_,
           this.dragOffset < 0 ? 0 - this.dragSteps : this.dragSteps
         )
         this.dragOffset = null

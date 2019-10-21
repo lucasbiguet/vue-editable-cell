@@ -91,7 +91,7 @@
       :value="currentData.value"
       :options="currentData.options"
       @change="updateData"
-      @drag="applyValueToAdjacentRows"
+      @drag="updateData"
     />
   </div>
 </template>
@@ -165,26 +165,11 @@ export default {
       this.currentData = data
     },
 
-    updateData (value) {
-      this.tableData[this.focusedRowIndex][this.focusedTd.cellIndex].value = value
-      this.focusedTd = null
-      this.currentData = null
-    },
+    updateData (value, steps = 0) {
+      const loopBounds = [this.focusedRowIndex, this.focusedRowIndex + steps].sort()
 
-    applyValueToAdjacentRows (steps) {
-      if (!steps) return
-
-      let i = this.focusedRowIndex
-      let condition = () => {
-        return steps < 0
-          ? i >= this.focusedRowIndex + steps
-          : i <= this.focusedRowIndex + steps
-      }
-
-      while (condition()) {
-        this.tableData[i][this.focusedTd.cellIndex].value = this.currentData.value
-
-        steps < 0 ? i-- : i++
+      for (let rowIndex = loopBounds[0]; rowIndex <= loopBounds[1]; rowIndex++) {
+        this.tableData[rowIndex][this.focusedTd.cellIndex].value = value
       }
 
       this.focusedTd = null
