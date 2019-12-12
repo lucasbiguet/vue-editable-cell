@@ -1,6 +1,6 @@
 {
   "name": "@lucasbiguet/vue-editable-cell",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vue.js component to emulate spreadsheet-like table cells edition",
   "author": "Lucas BIGUET-MERMET <lucas.biguetmermet@gmail.com>",
   "scripts": {
