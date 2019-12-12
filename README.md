@@ -2,7 +2,7 @@
 
 ![demo](./public/demo.gif)
 
-## [Demo](https://pensive-hopper-40afc5.netlify.com/)
+## [Demo](https://vue-editable-cell.netlify.com/)
 
 To run it locally clone this repo and:
 
@@ -14,18 +14,16 @@ yarn serve
 
 ## Install
 
-TODO push on NPM
-
-Meanwhile you can import it directly from this repo:
-
 ``` bash
-yarn add https://github.com/lucasbiguet/vue-editable-cell.git
+yarn add @lucasbiguet/vue-editable-cell
 ```
 
-Then import the component:
+Then import the component as a plugin:
 
 ``` js
 import EditableCell from 'vue-editable-cell'
+
+Vue.use(EditableCell)
 ```
 
 ## Usage
