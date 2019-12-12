@@ -1,38 +1,42 @@
 {
-  "name": "vue-editable-cell",
+  "name": "@lucasbiguet/vue-editable-cell",
   "version": "0.1.0",
+  "description": "Vue.js component to emulate spreadsheet-like table cells edition",
   "author": "Lucas BIGUET-MERMET <lucas.biguetmermet@gmail.com>",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build:browser": "rollup -c build/rollup.config.browser.js",
+    "build:es": "rollup -c build/rollup.config.es.js",
+    "build:umd": "rollup -c build/rollup.config.umd.js",
+    "build": "yarn build:browser && yarn build:es && yarn build:umd",
+    "prepublishOnly": "yarn build",
+    "lint": "eslint --ext .js --ignore-path .gitignore build/ src/ --fix"
   },
-  "main": "src/index.js",
+  "main": "dist/vue-editable-cell.umd.js",
+  "module": "dist/vue-editable-cell.es.js",
+  "unpkg": "dist/vue-editable-cell.min.js",
   "dependencies": {
-    "core-js": "^3.1.2",
     "v-dragged": "^0.0.5",
-    "vue": "^2.6.10",
     "vue-focus": "^2.1.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.0.0",
-    "@vue/cli-plugin-eslint": "^4.0.0",
-    "@vue/cli-service": "^4.0.0",
-    "@vue/eslint-config-standard": "^4.0.0",
-    "babel-eslint": "^10.0.1",
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@vue/eslint-config-standard": "^5.0.1",
+    "babel-eslint": "^10.0.3",
     "eslint": "^5.16.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^5.0.0",
-    "lint-staged": "^9.4.2",
+    "rollup": "^1.27.11",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^5.1.3",
+    "rollup-plugin-vue": "^5.1.4",
     "vue-template-compiler": "^2.6.10"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,vue}": [
-      "vue-cli-service lint",
-      "git add"
-    ]
   },
   "homepage": "https://github.com/lucasbiguet/vue-editable-cell",
   "license": "MIT"

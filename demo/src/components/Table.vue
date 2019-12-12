@@ -97,12 +97,8 @@
 </template>
 
 <script>
-import EditableCell from '../../../src/components/EditableCell'
-
 export default {
   name: 'Table',
-
-  components: { EditableCell },
 
   props: {
     months: {
