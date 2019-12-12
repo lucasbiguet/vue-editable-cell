@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import EditableCell from '../../dist/vue-editable-cell.es.js'
+import EditableCell from '../../src/index'
 
 Vue.config.productionTip = false
 
