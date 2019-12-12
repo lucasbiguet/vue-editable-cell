@@ -2,9 +2,7 @@
 
 ![demo](./public/demo.gif)
 
-## Demo
-
-TODO push on Netlify
+## [Demo](https://pensive-hopper-40afc5.netlify.com/)
 
 To run it locally clone this repo and:
 
