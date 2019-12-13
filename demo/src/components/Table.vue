@@ -90,6 +90,7 @@
       :target="focusedTd"
       :value="currentData.value"
       :options="currentData.options"
+      :select-box-style="{ border: '1px dotted green' }"
       @change="updateData"
       @drag="updateData"
     />

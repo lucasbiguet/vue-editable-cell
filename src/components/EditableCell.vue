@@ -9,7 +9,7 @@
   >
     <div class="handle" v-if="!editing" @click.stop v-dragged="onDragged"></div>
 
-    <div class="select-box" :style="selectBoxStyle" v-if="dragOffset !== null"></div>
+    <div class="select-box" :style="selectBoxStyle_" v-if="dragOffset !== null"></div>
 
     <select v-if="editing && Array.isArray(options)" v-model="value_" @change.stop="submit(value_)">
       <option v-for="(option, i) in options" :value="option.value" :key="i">{{ option.label }}</option>
@@ -45,6 +45,11 @@ export default {
     options: {
       type: Array,
       default: undefined
+    },
+
+    selectBoxStyle: {
+      type: Object,
+      default: () => ({})
     }
   },
 
@@ -81,10 +86,13 @@ export default {
       }
     },
 
-    selectBoxStyle () {
+    selectBoxStyle_ () {
       if (!this.target || this.dragOffset === null) return
 
       return {
+        border: '1px solid red',
+        ...this.selectBoxStyle,
+
         width: this.textareaStyle.width,
         height: this.valueToPixels(
           this.target.offsetHeight * (1 + this.dragSteps) - 1
