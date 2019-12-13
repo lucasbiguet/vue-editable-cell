@@ -188,10 +188,24 @@ export default {
       }
     },
 
+    cancelOnClickOutside (e) {
+      if (!this.$el.contains(e.target)) {
+        this.cancel()
+      }
+    },
+
     cancel () {
       this.value_ = this.value
       this.editing = false
     }
+  },
+
+  mounted () {
+    document.addEventListener('click', this.cancelOnClickOutside)
+  },
+
+  beforeDestroy () {
+    document.removeEventListener('click', this.cancelOnClickOutside)
   }
 }
 </script>
@@ -231,7 +245,6 @@ export default {
 }
 
 .wrapper .select-box {
-  border: 1px solid red;
   position: absolute;
 }
 </style>
