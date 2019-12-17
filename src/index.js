@@ -1,5 +1,4 @@
 import EditableCell from './components/EditableCell.vue'
-import { focus } from 'vue-focus'
 import VDragged from 'v-dragged'
 
 const install = function (Vue) {

@@ -1,103 +1,33 @@
 <template>
-  <div>
-    <h4>Simple table</h4>
-    <table class ref="table">
-      <tr v-for="(row, rowId) in tableData" :key="rowId">
-        <td
-          v-for="(cell, cellId) in row"
-          @click="editTd($event.currentTarget, cell)"
-          :key="cellId"
-        >
-          <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-        </td>
-      </tr>
-    </table>
-
-    <h4>With header</h4>
-
-    <table class ref="table">
-      <thead>
-        <tr>
-          <th rowspan="2">1</th>
-          <th>2</th>
-          <th>3</th>
-        </tr>
-        <tr>
-          <th>2</th>
-          <th>3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, rowId) in tableData" :key="rowId">
-          <td
-            v-for="(cell, cellId) in row"
-            @click="editTd($event.currentTarget, cell)"
-            :key="cellId"
-          >
-            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h4>with multiple tBodies</h4>
-
-    <table class ref="table">
-      <thead>
-        <tr>
-          <th>1</th>
-          <th>2</th>
-          <th>3</th>
-        </tr>
-      </thead>
-      <tbody style="border-bottom: 3px solid grey">
-        <tr v-for="(row, rowId) in tableData" :key="rowId">
-          <td
-            v-for="(cell, cellId) in row"
-            @click="editTd($event.currentTarget, cell)"
-            :key="cellId"
-          >
-            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-          </td>
-        </tr>
-      </tbody>
-      <tbody style="border-bottom: 3px solid grey">
-        <tr v-for="(row, rowId) in tableData" :key="rowId">
-          <td
-            v-for="(cell, cellId) in row"
-            @click="editTd($event.currentTarget, cell)"
-            :key="cellId"
-          >
-            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-          </td>
-        </tr>
-      </tbody>
-      <tbody>
-        <tr v-for="(row, rowId) in tableData" :key="rowId">
-          <td
-            v-for="(cell, cellId) in row"
-            @click="editTd($event.currentTarget, cell)"
-            :key="cellId"
-          >
-            <span>{{ cell.options ? cell.options[cell.value - 1] && cell.options[cell.value - 1].label : cell.value }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <b-container>
+    <b-row>
+      <b-col :md="6" :offset-md="3">
+        <b-table
+          bordered
+          fixed
+          small
+          head-row-variant="secondary"
+          :items="items"
+          :fields="fields"
+          class="mt-5"
+          @row-clicked="editTd"
+        ></b-table>
+      </b-col>
+    </b-row>
 
     <EditableCell
-      v-if="currentData"
+      v-if="focusedTd && focusedField.editable"
       :target="focusedTd"
-      :value="currentData.value"
-      :options="currentData.options"
-      :select-box-style="{ border: '1px dotted green' }"
-      @change="updateData"
+      v-model="items[focusedRowIndex][focusedField.key]"
+      :options="focusedField && focusedField.options"
       @drag="updateData"
     />
-  </div>
+  </b-container>
 </template>
 
 <script>
+import users from '../users.json'
+
 export default {
   name: 'Table',
 
@@ -123,21 +53,35 @@ export default {
 
   data () {
     return {
-      tableData: [
-        [{ value: null }, { value: 10 }, { value: 2, options: this.months }],
-        [{ value: 0 }, { value: undefined }, { value: 3, options: this.months }],
-        [{ value: 0 }, { value: 10 }, { value: 1, options: this.months }],
-        [{ value: null }, { value: 10 }, { value: null, options: this.months }],
-        [{ value: 0 }, { value: undefined }, { value: 4, options: this.months }],
-        [{ value: 0 }, { value: 10 }, { value: 4, options: this.months }]
+      items: users,
+
+      fields: [
+        { key: 'first_name', label: 'First name', variant: 'secondary' },
+        { key: 'last_name', label: 'Last name', editable: true },
+        { key: 'age', label: 'Age', editable: true },
+        {
+          key: 'month',
+          label: 'Mois',
+          options: this.months,
+          editable: true,
+          formatter: (value) => {
+            const month = this.months.find(m => m.value === parseInt(value))
+            return month ? month.label : ''
+          }
+        }
       ],
 
-      focusedTd: null,
-      currentData: null
+      focusedTd: null
     }
   },
 
   computed: {
+    focusedField () {
+      if (!this.focusedTd) return
+
+      return this.fields[this.focusedTd.cellIndex]
+    },
+
     focusedContainer () {
       if (this.focusedTd.closest('tbody')) return this.focusedTd.closest('tbody')
       if (this.focusedTd.closest('table')) return this.focusedTd.closest('table')
@@ -157,19 +101,20 @@ export default {
   },
 
   methods: {
-    editTd (td, data) {
-      this.focusedTd = td
-      this.currentData = data
+    editTd (_item, _idx, e) {
+      if (e.target && e.target.tagName === 'TD') this.focusedTd = e.target
     },
 
     updateData (value, steps = 0) {
-      const loopBounds = [this.focusedRowIndex, this.focusedRowIndex + steps].sort()
+      const loopBounds = [this.focusedRowIndex, this.focusedRowIndex + steps].sort((a, b) => a > b)
+
+      console.log(loopBounds)
 
       for (let rowIndex = loopBounds[0]; rowIndex <= loopBounds[1]; rowIndex++) {
-        this.tableData[rowIndex][this.focusedTd.cellIndex].value = value
+        console.log(rowIndex)
+        this.items[rowIndex][this.focusedField.key] = value
       }
 
-      this.focusedTd = null
       this.currentData = null
     }
   }

@@ -4,31 +4,39 @@
     :style="wrapperStyle"
     v-if="target"
     v-on="$listeners"
-    @click="editing = true"
-    @keyup.esc="cancel"
+    @dblclick="editing = true"
+    @change="editing = false"
+    @keyup.esc="editing = false"
   >
-    <div class="handle" v-if="!editing" @click.stop v-dragged="onDragged"></div>
+    <div class="handle" v-if="!editing" @click.stop v-dragged="onDragged" :style="{ 'background-color': focusColor }"></div>
 
-    <div class="select-box" :style="selectBoxStyle_" v-if="dragOffset !== null"></div>
+    <div class="select-box" :style="selectBoxStyle" v-if="dragOffset !== null"></div>
 
-    <select v-if="editing && Array.isArray(options)" v-model="value_" @change.stop="submit(value_)">
+    <select ref="select" v-if="editing && Array.isArray(options)" :value="value" @change="$emit('update', $event.target.value)">
       <option v-for="(option, i) in options" :value="option.value" :key="i">{{ option.label }}</option>
     </select>
 
-    <textarea
+    <input
+      ref="input"
+      type="text"
       v-else-if="editing"
-      v-model="value_"
-      :style="textareaStyle"
-      @keypress.enter="submit(value_)"
-      @keypress.tab="submit(value_)"
-      v-focus="true"
-    ></textarea>
+      :value="value"
+      :style="inputStyle"
+      @input="$emit('update', $event.target.value)"
+      @keypress.enter="editing = false"
+      @keypress.tab="editing = false"
+    >
   </div>
 </template>
 
 <script>
 
 export default {
+  model: {
+    prop: 'value',
+    event: 'update'
+  },
+
   name: 'EditableCell',
 
   props: {
@@ -47,62 +55,68 @@ export default {
       default: undefined
     },
 
-    selectBoxStyle: {
-      type: Object,
-      default: () => ({})
+    borderSize: {
+      type: Number,
+      default: 2
+    },
+
+    focusColor: {
+      type: String,
+      default: 'darkblue'
+    },
+
+    dragColor: {
+      type: String,
+      default: 'firebrick'
     }
   },
 
   data () {
     return {
       dragOffset: null,
-      value_: '',
       editing: false
     }
   },
 
   computed: {
+    targetBounds () {
+      if (!this.target) return {}
+
+      return this.target.getBoundingClientRect()
+    },
+
     wrapperStyle () {
       if (!this.target) return
 
       return {
-        width: this.valueToPixels(this.target.offsetWidth - 1),
-        height: this.valueToPixels(this.target.offsetHeight - 1),
-        top: this.valueToPixels(
-          window.scrollY + this.target.getBoundingClientRect().top - 1
-        ),
-        left: this.valueToPixels(
-          window.scrollX + this.target.getBoundingClientRect().left - 1
-        )
+        border: `${this.borderSize}px solid ${this.focusColor}`,
+        width: `${this.targetBounds.width}px`,
+        height: `${this.targetBounds.height}px`,
+        top: `${window.scrollY + this.targetBounds.top}px`,
+        left: `${window.scrollX + this.targetBounds.left}px`
       }
     },
 
-    textareaStyle () {
+    inputStyle () {
       if (!this.target) return
 
       return {
-        width: this.valueToPixels(this.target.offsetWidth - 1),
-        height: this.valueToPixels(this.target.offsetHeight - 1)
+        width: `${this.targetBounds.width - 2 * this.borderSize}px`,
+        height: `${this.targetBounds.height - 2 * this.borderSize}px`
       }
     },
 
-    selectBoxStyle_ () {
+    selectBoxStyle () {
       if (!this.target || this.dragOffset === null) return
 
       return {
-        border: '1px solid red',
-        ...this.selectBoxStyle,
-
-        width: this.textareaStyle.width,
-        height: this.valueToPixels(
-          this.target.offsetHeight * (1 + this.dragSteps) - 1
-        ),
-        top: this.valueToPixels(
-          this.dragOffset <= 0
-            ? (0 - this.target.offsetHeight) * this.dragSteps - 1
-            : (0 - 1)
-        ),
-        left: this.valueToPixels(0 - 1)
+        border: `${this.borderSize}px solid ${this.dragColor}`,
+        width: `${this.targetBounds.width}px`,
+        height: `${this.targetBounds.height + (this.targetBounds.height * this.dragSteps)}px`,
+        top: this.dragOffset <= 0
+          ? `-${this.borderSize + (this.targetBounds.height * this.dragSteps)}px`
+          : `-${this.borderSize}px`,
+        left: `-${this.borderSize}px`
       }
     },
 
@@ -153,33 +167,26 @@ export default {
   },
 
   watch: {
-    value: {
-      immediate: true,
-      handler (value) {
-        this.value_ = value
-      }
-    },
+    target () { this.editing = false },
 
-    target () {
-      this.editing = false
+    editing (editing) {
+      if (!editing) return
+
+      this.$nextTick(() => {
+        const input = this.options ? this.$refs.select : this.$refs.input
+        input.focus()
+      })
     }
   },
 
   methods: {
-    valueToPixels: value => `${value}px`,
-
-    submit (value) {
-      this.$emit('change', value)
-      this.editing = false
-    },
-
     onDragged (e) {
       if (e.first) {
         this.dragOffset = 0
       } else if (e.last) {
         this.$emit(
           'drag',
-          this.value_,
+          this.value,
           this.dragOffset < 0 ? 0 - this.dragSteps : this.dragSteps
         )
         this.dragOffset = null
@@ -190,13 +197,8 @@ export default {
 
     cancelOnClickOutside (e) {
       if (!this.$el.contains(e.target)) {
-        this.cancel()
+        this.editing = false
       }
-    },
-
-    cancel () {
-      this.value_ = this.value
-      this.editing = false
     }
   },
 
@@ -215,28 +217,24 @@ export default {
   display: block;
   position: absolute;
   user-select: none;
-  border: 1px solid grey;
 }
 
 .wrapper select {
   width: 100%;
   height: 100%;
   border: none;
-  top: -1px;
   position: relative;
 }
 
-.wrapper textarea {
+.wrapper input {
   resize: none;
   margin: 0;
-  padding: 0;
   border: none;
 }
 
 .wrapper .handle {
   width: 6px;
   height: 6px;
-  background-color: grey;
   border: 0;
   position: absolute;
   right: -1px;

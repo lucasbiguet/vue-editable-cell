@@ -8,10 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "bootstrap-vue": "^2.1.0",
     "core-js": "^3.1.2",
     "v-dragged": "^0.0.5",
-    "vue": "^2.6.10",
-    "vue-focus": "^2.1.0"
+    "vue": "^2.6.10"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.0.0",

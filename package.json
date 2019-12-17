@@ -15,8 +15,7 @@
   "module": "dist/vue-editable-cell.es.js",
   "unpkg": "dist/vue-editable-cell.min.js",
   "dependencies": {
-    "v-dragged": "^0.0.5",
-    "vue-focus": "^2.1.0"
+    "v-dragged": "^0.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.7.5",
