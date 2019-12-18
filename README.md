@@ -1,7 +1,5 @@
 # vue-editable-cell
 
-![demo](./public/demo.gif)
-
 ## [Demo](https://vue-editable-cell.netlify.com/)
 
 To run it locally clone this repo and:
@@ -35,9 +33,8 @@ The components works on any regular table and requires a TD element as target
 ``` js
 <EditableCell
   :target="focusedTd"
-  :value="editableValue"
+  v-model="editableValue"
   :options="selectOptions"
-  @change="updateData"
   @drag="applyValueToAdjacentRows"
 />
 ```
@@ -46,7 +43,7 @@ TODO list and explain props
 
 ## Improvements
 
-This package is in very early stage of development, features are missing:
+This package is in very early stage of development, features are missing, things will break unexpectedly, be prepared for an adventure!
 
 - Drag n drop horizontally
 - Style customisation via props
