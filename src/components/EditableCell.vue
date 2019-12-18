@@ -5,14 +5,13 @@
     v-if="target"
     v-on="$listeners"
     @dblclick="editing = true"
-    @change="editing = false"
     @keyup.esc="editing = false"
   >
-    <div class="handle" v-if="!editing" @click.stop v-dragged="onDragged" :style="{ 'background-color': focusColor }"></div>
+    <div class="handle" v-if="!editing" v-show="!dragging" @click.stop v-dragged="$_onDragged" :style="handleStyle"></div>
 
-    <div class="select-box" :style="selectBoxStyle" v-if="dragOffset !== null"></div>
+    <div class="select-box" :style="selectBoxStyle" v-if="dragging"></div>
 
-    <select ref="select" v-if="editing && Array.isArray(options)" :value="value" @change="$emit('update', $event.target.value)">
+    <select v-if="editing && Array.isArray(options)" :value="value" @change="$emit('update', $event.target.value)">
       <option v-for="(option, i) in options" :value="option.value" :key="i">{{ option.label }}</option>
     </select>
 
@@ -24,7 +23,7 @@
       :style="inputStyle"
       @input="$emit('update', $event.target.value)"
       @keypress.enter="editing = false"
-      @keypress.tab="editing = false"
+      @keydown.tab="editing = false"
     >
   </div>
 </template>
@@ -42,7 +41,7 @@ export default {
   props: {
     target: {
       type: HTMLTableCellElement,
-      default: null
+      required: true
     },
 
     value: {
@@ -55,19 +54,14 @@ export default {
       default: undefined
     },
 
-    borderSize: {
+    size: {
       type: Number,
       default: 2
     },
 
-    focusColor: {
+    color: {
       type: String,
       default: 'darkblue'
-    },
-
-    dragColor: {
-      type: String,
-      default: 'firebrick'
     }
   },
 
@@ -79,17 +73,15 @@ export default {
   },
 
   computed: {
-    targetBounds () {
-      if (!this.target) return {}
+    dragging () { return this.dragOffset !== null },
 
+    targetBounds () {
       return this.target.getBoundingClientRect()
     },
 
     wrapperStyle () {
-      if (!this.target) return
-
       return {
-        border: `${this.borderSize}px solid ${this.focusColor}`,
+        border: `${this.size}px solid ${this.color}`,
         width: `${this.targetBounds.width}px`,
         height: `${this.targetBounds.height}px`,
         top: `${window.scrollY + this.targetBounds.top}px`,
@@ -98,30 +90,38 @@ export default {
     },
 
     inputStyle () {
-      if (!this.target) return
-
       return {
-        width: `${this.targetBounds.width - 2 * this.borderSize}px`,
-        height: `${this.targetBounds.height - 2 * this.borderSize}px`
+        width: `${this.targetBounds.width - 2 * this.size}px`,
+        height: `${this.targetBounds.height - 2 * this.size}px`
       }
     },
 
     selectBoxStyle () {
-      if (!this.target || this.dragOffset === null) return
+      if (this.dragOffset === null) return
 
       return {
-        border: `${this.borderSize}px solid ${this.dragColor}`,
+        border: `${this.size / 2 > 0 ? this.size / 2 : 1}px solid ${this.color}`,
         width: `${this.targetBounds.width}px`,
         height: `${this.targetBounds.height + (this.targetBounds.height * this.dragSteps)}px`,
         top: this.dragOffset <= 0
-          ? `-${this.borderSize + (this.targetBounds.height * this.dragSteps)}px`
-          : `-${this.borderSize}px`,
-        left: `-${this.borderSize}px`
+          ? `-${this.size + (this.targetBounds.height * this.dragSteps)}px`
+          : `-${this.size}px`,
+        left: `-${this.size}px`
+      }
+    },
+
+    handleStyle () {
+      return {
+        'background-color': this.color,
+        width: `${7 + this.size}px`,
+        height: `${7 + this.size}px`,
+        right: `-${3 + this.size}px`,
+        bottom: `-${3 + this.size}px`
       }
     },
 
     dragSteps () {
-      if (!this.target || this.dragOffset === null) return 0
+      if (this.dragOffset === null) return 0
 
       const steps =
         (this.dragOffset <= 0 ? 0 : 1) +
@@ -132,7 +132,6 @@ export default {
 
     rowIndex () {
       if (
-        !this.target ||
         !this.target.closest('tr') ||
         !this.targetContainer
       ) return null
@@ -148,7 +147,7 @@ export default {
     },
 
     rowsCount () {
-      if (!this.target || !this.targetContainer) { return 0 }
+      if (!this.targetContainer) { return 0 }
 
       return this.targetContainer.rows.length
     },
@@ -167,20 +166,22 @@ export default {
   },
 
   watch: {
-    target () { this.editing = false },
-
     editing (editing) {
       if (!editing) return
 
       this.$nextTick(() => {
-        const input = this.options ? this.$refs.select : this.$refs.input
-        input.focus()
+        if (this.options) return
+
+        this.$refs.input.focus()
+        this.$refs.input.select()
       })
     }
   },
 
   methods: {
-    onDragged (e) {
+    toggleEdition (editing) { this.editing = editing },
+
+    $_onDragged (e) {
       if (e.first) {
         this.dragOffset = 0
       } else if (e.last) {
@@ -195,7 +196,7 @@ export default {
       }
     },
 
-    cancelOnClickOutside (e) {
+    $_cancelOnClickOutside (e) {
       if (!this.$el.contains(e.target)) {
         this.editing = false
       }
@@ -203,11 +204,11 @@ export default {
   },
 
   mounted () {
-    document.addEventListener('click', this.cancelOnClickOutside)
+    document.addEventListener('click', this.$_cancelOnClickOutside)
   },
 
   beforeDestroy () {
-    document.removeEventListener('click', this.cancelOnClickOutside)
+    document.removeEventListener('click', this.$_cancelOnClickOutside)
   }
 }
 </script>
@@ -233,12 +234,8 @@ export default {
 }
 
 .wrapper .handle {
-  width: 6px;
-  height: 6px;
-  border: 0;
+  border: 1px solid white;
   position: absolute;
-  right: -1px;
-  bottom: -1px;
   cursor: crosshair;
 }
 

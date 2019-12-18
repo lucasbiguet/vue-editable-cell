@@ -16,11 +16,13 @@
     </b-row>
 
     <EditableCell
+      ref="editableCell"
       v-if="focusedTd && focusedField.editable"
       :target="focusedTd"
-      v-model="items[focusedRowIndex][focusedField.key]"
+      v-model="items[focusedRow.rowIndex - 1][focusedField.key]"
       :options="focusedField && focusedField.options"
-      @drag="updateData"
+      @drag="applyToAdjacentRows"
+      @keypress.enter="nextRow"
     />
   </b-container>
 </template>
@@ -89,14 +91,10 @@ export default {
       return null
     },
 
-    focusedRowIndex () {
-      if (
-        !this.focusedTd ||
-        !this.focusedTd.closest('tr') ||
-        !this.focusedContainer
-      ) return null
+    focusedRow () {
+      if (!this.focusedTd) return null
 
-      return Array.from(this.focusedContainer.rows).indexOf(this.focusedTd.closest('tr'))
+      return this.focusedTd.closest('tr')
     }
   },
 
@@ -105,17 +103,29 @@ export default {
       if (e.target && e.target.tagName === 'TD') this.focusedTd = e.target
     },
 
-    updateData (value, steps = 0) {
-      const loopBounds = [this.focusedRowIndex, this.focusedRowIndex + steps].sort((a, b) => a > b)
+    applyToAdjacentRows (value, steps = 0) {
+      if (!this.focusedRow) return
 
-      console.log(loopBounds)
+      const loopBounds = [this.focusedRow.rowIndex - 1, this.focusedRow.rowIndex - 1 + steps].sort((a, b) => a > b)
 
       for (let rowIndex = loopBounds[0]; rowIndex <= loopBounds[1]; rowIndex++) {
-        console.log(rowIndex)
         this.items[rowIndex][this.focusedField.key] = value
       }
 
-      this.currentData = null
+      this.focusedTd = null
+    },
+
+    nextRow () {
+      if (
+        !this.focusedRow ||
+        this.focusedRow.nextSibling.tagName !== 'TR'
+      ) return
+
+      const nextCell = this.focusedRow.nextSibling.cells[this.focusedTd.cellIndex]
+      if (nextCell.tagName !== 'TD') return
+
+      this.focusedTd = nextCell
+      this.$refs.editableCell.toggleEdition(true)
     }
   }
 }
