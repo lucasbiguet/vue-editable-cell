@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <b-row>
-      <b-col :md="6" :offset-md="3">
+      <b-col style="position: relative !important;" :md="6" :offset-md="3">
         <b-table
           bordered
           fixed
@@ -12,18 +12,18 @@
           class="mt-5"
           @row-clicked="editTd"
         ></b-table>
+
+        <EditableCell
+          ref="editableCell"
+          v-if="focusedTd && focusedField.editable"
+          :target="focusedTd"
+          v-model="items[focusedRow.rowIndex - 1][focusedField.key]"
+          :options="focusedField && focusedField.options"
+          @drag="applyToAdjacentRows"
+          @keypress.enter="nextRow"
+        />
       </b-col>
     </b-row>
-
-    <EditableCell
-      ref="editableCell"
-      v-if="focusedTd && focusedField.editable"
-      :target="focusedTd"
-      v-model="items[focusedRow.rowIndex - 1][focusedField.key]"
-      :options="focusedField && focusedField.options"
-      @drag="applyToAdjacentRows"
-      @keypress.enter="nextRow"
-    />
   </b-container>
 </template>
 
@@ -132,6 +132,12 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+table tr {
+  height: 35px;
+}
+</style>
+
 <style scoped>
 input {
   width: 80px;

@@ -1,21 +1,22 @@
 <template>
   <div
-    class="wrapper"
+    class="vue-editable-cell__wrapper"
     :style="wrapperStyle"
     v-if="target"
     v-on="$listeners"
     @dblclick="editing = true"
     @keyup.esc="editing = false"
   >
-    <div class="handle" v-if="!editing" v-show="!dragging" @click.stop v-dragged="$_onDragged" :style="handleStyle"></div>
+    <div class="vue-editable-cell__handle" v-if="!editing" v-show="!dragging" @click.stop v-dragged="$_onDragged"></div>
 
-    <div class="select-box" :style="selectBoxStyle" v-if="dragging"></div>
+    <div class="vue-editable-cell__drag-box" :style="dragBoxStyle" v-if="dragging"></div>
 
-    <select v-if="editing && Array.isArray(options)" :value="value" @change="$emit('update', $event.target.value)">
+    <select class="vue-editable-cell__select" v-if="editing && Array.isArray(options)" :value="value" @change="$emit('update', $event.target.value)">
       <option v-for="(option, i) in options" :value="option.value" :key="i">{{ option.label }}</option>
     </select>
 
     <input
+      class="vue-editable-cell__input"
       ref="input"
       type="text"
       v-else-if="editing"
@@ -52,16 +53,6 @@ export default {
     options: {
       type: Array,
       default: undefined
-    },
-
-    size: {
-      type: Number,
-      default: 2
-    },
-
-    color: {
-      type: String,
-      default: 'darkblue'
     }
   },
 
@@ -74,49 +65,33 @@ export default {
 
   computed: {
     dragging () { return this.dragOffset !== null },
-
-    targetBounds () {
-      return this.target.getBoundingClientRect()
-    },
+    targetWidth () { return this.target.getBoundingClientRect().width },
+    targetHeight () { return this.target.getBoundingClientRect().height },
 
     wrapperStyle () {
       return {
-        border: `${this.size}px solid ${this.color}`,
-        width: `${this.targetBounds.width}px`,
-        height: `${this.targetBounds.height}px`,
-        top: `${window.scrollY + this.targetBounds.top}px`,
-        left: `${window.scrollX + this.targetBounds.left}px`
+        width: `${this.targetWidth}px`,
+        height: `${this.targetHeight}px`,
+        top: `${this.target.offsetTop + this.target.offsetParent.offsetTop}px`,
+        left: `${this.target.offsetLeft + this.target.offsetParent.offsetLeft}px`
       }
     },
 
     inputStyle () {
       return {
-        width: `${this.targetBounds.width - 2 * this.size}px`,
-        height: `${this.targetBounds.height - 2 * this.size}px`
+        width: `${this.targetWidth - 4}px`,
+        height: `${this.targetHeight - 4}px`
       }
     },
 
-    selectBoxStyle () {
+    dragBoxStyle () {
       if (this.dragOffset === null) return
 
       return {
-        border: `${this.size / 2 > 0 ? this.size / 2 : 1}px solid ${this.color}`,
-        width: `${this.targetBounds.width}px`,
-        height: `${this.targetBounds.height + (this.targetBounds.height * this.dragSteps)}px`,
-        top: this.dragOffset <= 0
-          ? `-${this.size + (this.targetBounds.height * this.dragSteps)}px`
-          : `-${this.size}px`,
-        left: `-${this.size}px`
-      }
-    },
-
-    handleStyle () {
-      return {
-        'background-color': this.color,
-        width: `${7 + this.size}px`,
-        height: `${7 + this.size}px`,
-        right: `-${3 + this.size}px`,
-        bottom: `-${3 + this.size}px`
+        width: `${this.targetWidth}px`,
+        height: `${this.targetHeight + (this.targetHeight * this.dragSteps)}px`,
+        top: this.dragOffset <= 0 ? `-${2 + (this.targetHeight * this.dragSteps)}px` : '-2px',
+        left: '-2px'
       }
     },
 
@@ -125,7 +100,7 @@ export default {
 
       const steps =
         (this.dragOffset <= 0 ? 0 : 1) +
-        parseInt(Math.abs(this.dragOffset) / this.target.offsetHeight, 10)
+        parseInt(Math.abs(this.dragOffset) / this.targetHeight, 10)
 
       return steps > this.maxDragSteps ? this.maxDragSteps : steps
     },
@@ -213,33 +188,40 @@ export default {
 }
 </script>
 
-<style scoped>
-.wrapper {
+<style>
+.vue-editable-cell__wrapper {
   display: block;
   position: absolute;
   user-select: none;
+  border: 2px solid darkblue;
 }
 
-.wrapper select {
+.vue-editable-cell__select {
   width: 100%;
   height: 100%;
   border: none;
   position: relative;
 }
 
-.wrapper input {
+.vue-editable-cell__input {
   resize: none;
   margin: 0;
   border: none;
 }
 
-.wrapper .handle {
+.vue-editable-cell__handle {
   border: 1px solid white;
+  background-color: darkblue;
   position: absolute;
   cursor: crosshair;
+  width: 9px;
+  height: 9px;
+  right: -5px;
+  bottom: -5px;
 }
 
-.wrapper .select-box {
+.vue-editable-cell__drag-box {
   position: absolute;
+  border: 1px solid darkblue;
 }
 </style>
